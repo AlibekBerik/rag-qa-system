@@ -32,7 +32,7 @@ Ask a question, get an answer generated from real retrieved source text - plus w
 
 5\. \*\*Retrieve\*\* - When a question comes in, it's embedded the same way, and ChromaDB finds the most semantically relevant chunks.
 
-6\. \*\*Generate\*\* - The question + retrieved chunks are sent to an LLM (Groq, `openai/gpt-oss-120b`) with instructions to answer \*only\* using that context — and to say so if the context doesn't contain the answer.
+6\. \*\*Generate\*\* - The question + retrieved chunks are sent to an LLM (Groq, `openai/gpt-oss-120b`) with instructions to answer \*only\* using that context - and to say so if the context doesn't contain the answer.
 
 
 
