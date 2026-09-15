@@ -10,7 +10,7 @@ A Retrieval-Augmented Generation (RAG) system that answers questions about Kazak
 
 
 
-!\[demo](https://github.com/AlibekBerik/rag-qa-system/blob/main/demo.gif)
+![demo](demo.gif)
 
 
 
