@@ -2,7 +2,7 @@
 
 
 
-A Retrieval-Augmented Generation (RAG) system that answers questions about Kazakh nomadic traditions, music, and customs — grounded in real Wikipedia articles, not model guesses.
+A Retrieval-Augmented Generation (RAG) system that answers questions about Kazakh nomadic traditions, music, and customs - grounded in real Wikipedia articles, not model guesses.
 
 
 
@@ -14,7 +14,7 @@ A Retrieval-Augmented Generation (RAG) system that answers questions about Kazak
 
 
 
-Ask a question, get an answer generated from real retrieved source text — plus which articles it came from. Ask something outside its knowledge base, and it correctly says so instead of making something up.
+Ask a question, get an answer generated from real retrieved source text - plus which articles it came from. Ask something outside its knowledge base, and it correctly says so instead of making something up.
 
 
 
@@ -22,17 +22,17 @@ Ask a question, get an answer generated from real retrieved source text — plus
 
 
 
-1\. \*\*Fetch\*\* — Pulls real Wikipedia articles on Kazakh culture (nomadic pastoralism, yurts, dombra, Nauryz, cuisine, eagle hunting, the Kazakh Khanate, and more) using the Wikipedia API.
+1\. \*\*Fetch\*\* - Pulls real Wikipedia articles on Kazakh culture (nomadic pastoralism, yurts, dombra, Nauryz, cuisine, eagle hunting, the Kazakh Khanate, and more) using the Wikipedia API.
 
-2\. \*\*Chunk\*\* — Splits articles into overlapping \~500-word chunks so retrieval can find specific relevant passages instead of whole articles.
+2\. \*\*Chunk\*\* - Splits articles into overlapping \~500-word chunks so retrieval can find specific relevant passages instead of whole articles.
 
-3\. \*\*Embed\*\* — Converts each chunk into a vector using `sentence-transformers` (`all-MiniLM-L6-v2`), capturing meaning rather than exact keywords.
+3\. \*\*Embed\*\* - Converts each chunk into a vector using `sentence-transformers` (`all-MiniLM-L6-v2`), capturing meaning rather than exact keywords.
 
-4\. \*\*Store\*\* — Saves all embeddings in a local ChromaDB vector database.
+4\. \*\*Store\*\* - Saves all embeddings in a local ChromaDB vector database.
 
-5\. \*\*Retrieve\*\* — When a question comes in, it's embedded the same way, and ChromaDB finds the most semantically relevant chunks.
+5\. \*\*Retrieve\*\* - When a question comes in, it's embedded the same way, and ChromaDB finds the most semantically relevant chunks.
 
-6\. \*\*Generate\*\* — The question + retrieved chunks are sent to an LLM (Groq, `openai/gpt-oss-120b`) with instructions to answer \*only\* using that context — and to say so if the context doesn't contain the answer.
+6\. \*\*Generate\*\* - The question + retrieved chunks are sent to an LLM (Groq, `openai/gpt-oss-120b`) with instructions to answer \*only\* using that context — and to say so if the context doesn't contain the answer.
 
 
 
@@ -42,7 +42,7 @@ Ask a question, get an answer generated from real retrieved source text — plus
 
 \*\*Q: What do Kazakhs eat traditionally?\*\*
 
-> Traditionally Kazakh food is centered on meat and dairy — large pieces of boiled horse or mutton (besbarmak), offal dishes like quwyrdaq, and fermented mare's milk (kumys)...
+> Traditionally Kazakh food is centered on meat and dairy - large pieces of boiled horse or mutton (besbarmak), offal dishes like quwyrdaq, and fermented mare's milk (kumys)...
 
 
 
@@ -56,7 +56,7 @@ Ask a question, get an answer generated from real retrieved source text — plus
 
 
 
-This refusal behavior is intentional and tested — the system is grounded in its actual knowledge base and doesn't hallucinate answers outside it.
+This refusal behavior is intentional and tested - the system is grounded in its actual knowledge base and doesn't hallucinate answers outside it.
 
 
 
