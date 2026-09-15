@@ -160,5 +160,5 @@ Then open `http://127.0.0.1:8000/docs` and try the `/ask` endpoint.
 
 
 
-`chroma\_db/` (the built vector database) isn't included in this repo to keep it lightweight — running `fetch\_articles.py` then `build\_index.py` rebuilds it locally in under a minute.
+`chroma\_db/` (the built vector database) isn't included in this repo to keep it lightweight - running `fetch\_articles.py` then `build\_index.py` rebuilds it locally in under a minute.
 
