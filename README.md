@@ -1,164 +1,95 @@
-\# Kazakh Culture RAG Q\&A System
+# Kazakh Culture RAG Q&A System
 
+[![tests](https://github.com/AlibekBerik/rag-qa-system/actions/workflows/tests.yml/badge.svg)](https://github.com/AlibekBerik/rag-qa-system/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 
-
-A Retrieval-Augmented Generation (RAG) system that answers questions about Kazakh nomadic traditions, music, and customs - grounded in real Wikipedia articles, not model guesses.
-
-
-
-\## Demo
-
-
+A Retrieval-Augmented Generation (RAG) system that answers questions about Kazakh nomadic traditions, music and customs, grounded in real Wikipedia articles rather than model guesses. Ask something outside its knowledge base and it says so instead of making something up.
 
 ![demo](demo.gif)
 
+## How it works
 
+```mermaid
+flowchart LR
+    W[Wikipedia API] -->|fetch_articles.py| A[articles.json]
+    A -->|chunk 500 words, 50 overlap| C[Chunks]
+    C -->|all-MiniLM-L6-v2| E[(ChromaDB)]
+    Q[Question] -->|embed| E
+    E -->|top 4 chunks| P[Grounded prompt]
+    P -->|Groq: gpt-oss-120b| R[Answer + sources]
+```
 
-Ask a question, get an answer generated from real retrieved source text - plus which articles it came from. Ask something outside its knowledge base, and it correctly says so instead of making something up.
+1. **Fetch**: pulls Wikipedia articles on Kazakh culture (nomadic pastoralism, yurts, the dombra, Nauryz, cuisine, eagle hunting, the Kazakh Khanate and more).
+2. **Chunk**: splits each article into overlapping ~500-word chunks, so retrieval finds specific passages instead of whole articles.
+3. **Embed**: turns each chunk into a vector with `sentence-transformers` (`all-MiniLM-L6-v2`).
+4. **Store**: saves the vectors in a local ChromaDB database.
+5. **Retrieve**: embeds the question the same way and fetches the 4 most similar chunks.
+6. **Generate**: sends the question and chunks to an LLM (Groq, `openai/gpt-oss-120b`) with an instruction to answer *only* from that context, and to say so when the context doesn't contain the answer.
 
+## Example
 
+**Q: What do Kazakhs eat traditionally?**
+> Traditionally Kazakh food is centered on meat and dairy: large pieces of boiled horse or mutton (besbarmak), offal dishes like quwyrdaq, and fermented mare's milk (kumys)...
 
-\## How it works
+*Sources: Kazakh cuisine, Kazakhs, Kazakh clothing*
 
-
-
-1\. \*\*Fetch\*\* - Pulls real Wikipedia articles on Kazakh culture (nomadic pastoralism, yurts, dombra, Nauryz, cuisine, eagle hunting, the Kazakh Khanate, and more) using the Wikipedia API.
-
-2\. \*\*Chunk\*\* - Splits articles into overlapping \~500-word chunks so retrieval can find specific relevant passages instead of whole articles.
-
-3\. \*\*Embed\*\* - Converts each chunk into a vector using `sentence-transformers` (`all-MiniLM-L6-v2`), capturing meaning rather than exact keywords.
-
-4\. \*\*Store\*\* - Saves all embeddings in a local ChromaDB vector database.
-
-5\. \*\*Retrieve\*\* - When a question comes in, it's embedded the same way, and ChromaDB finds the most semantically relevant chunks.
-
-6\. \*\*Generate\*\* - The question + retrieved chunks are sent to an LLM (Groq, `openai/gpt-oss-120b`) with instructions to answer \*only\* using that context - and to say so if the context doesn't contain the answer.
-
-
-
-\## Example
-
-
-
-\*\*Q: What do Kazakhs eat traditionally?\*\*
-
-> Traditionally Kazakh food is centered on meat and dairy - large pieces of boiled horse or mutton (besbarmak), offal dishes like quwyrdaq, and fermented mare's milk (kumys)...
-
-
-
-\*Sources: Kazakh cuisine, Kazakhs, Kazakh clothing\*
-
-
-
-\*\*Q: What is the capital of France?\*\*
-
+**Q: What is the capital of France?**
 > I don't have enough information.
 
+## Tests
 
+| Suite | What it checks | Runs in CI |
+|---|---|---|
+| `tests/test_chunking.py` | Chunk size, overlap, full coverage of the text, no duplicate tail chunk, invalid settings | Yes |
+| `tests/test_api.py` | `/ask` flow, source de-duplication, and that the prompt carries the retrieved context and the refusal rule | Yes (models replaced by stand-ins) |
+| `tests/test_refusal_live.py` | 5 out-of-scope questions must each be refused by the real model | No: needs a Groq key |
 
-This refusal behavior is intentional and tested - the system is grounded in its actual knowledge base and doesn't hallucinate answers outside it.
+```bash
+pip install -r requirements-dev.txt
+pytest                                    # unit + API tests
+GROQ_API_KEY=your_key pytest -m live      # live refusal tests (needs a built chroma_db)
+```
 
-
-
-\## Tech stack
-
-
-
-\- Python, FastAPI
-
-\- ChromaDB (vector database)
-
-\- sentence-transformers (embeddings)
-
-\- Groq API (LLM generation)
-
-\- Docker (containerization)
-
-
-
-\## Running it yourself
-
-
-
-\### With Docker (recommended)
-
-
-
-\\`\\`\\`bash
-
-git clone https://github.com/AlibekBerik/rag-qa-system
-
-cd rag-qa-system
-
-\\`\\`\\`
-
-
+## Running it yourself
 
 Create a `.env` file with your own Groq API key:
 
-\\`\\`\\`
+```
+GROQ_API_KEY=your_key_here
+```
 
-GROQ\_API\_KEY=your\_key\_here
+Build the vector database (only needed once, takes under a minute):
 
-\\`\\`\\`
-
-
-
-Build the vector database (only needed once):
-
-\\`\\`\\`bash
-
+```bash
 pip install -r requirements.txt
+python fetch_articles.py
+python build_index.py
+```
 
-python fetch\_articles.py
+### With Docker (recommended)
 
-python build\_index.py
-
-\\`\\`\\`
-
-
-
-Build and run the container:
-
-\\`\\`\\`bash
-
+```bash
 docker build -t rag-qa-system .
-
 docker run -p 8000:8000 --env-file .env rag-qa-system
+```
 
-\\`\\`\\`
+### Without Docker
 
-
-
-\### Without Docker
-
-
-
-\\`\\`\\`bash
-
+```bash
 python -m venv venv
-
-venv\\\\Scripts\\\\activate      # Windows
-
+venv\Scripts\activate        # Windows (macOS/Linux: source venv/bin/activate)
 pip install -r requirements.txt
-
-python fetch\_articles.py
-
-python build\_index.py
-
 uvicorn api:app --reload
+```
 
-\\`\\`\\`
+Then open `http://127.0.0.1:8000/docs` and try the `/ask` endpoint. `demo_retrieval.py` prints the raw chunks retrieved for one question, which is useful for checking retrieval on its own.
 
+## Tech stack
 
+Python · FastAPI · ChromaDB · sentence-transformers · Groq API · Docker · pytest · GitHub Actions
 
-Then open `http://127.0.0.1:8000/docs` and try the `/ask` endpoint.
+## Note on data
 
-
-
-\## Note on data
-
-
-
-`chroma\_db/` (the built vector database) isn't included in this repo to keep it lightweight - running `fetch\_articles.py` then `build\_index.py` rebuilds it locally in under a minute.
-
+`chroma_db/` (the built vector database) isn't included, to keep the repo light. Running `fetch_articles.py` and then `build_index.py` rebuilds it locally.

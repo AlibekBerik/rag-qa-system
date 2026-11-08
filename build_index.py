@@ -2,22 +2,11 @@ import json
 import chromadb
 from sentence_transformers import SentenceTransformer
 
+from chunking import chunk_text
+
 # Load the articles we fetched
 with open("articles.json", "r", encoding="utf-8") as f:
     articles = json.load(f)
-
-# --- Chunking ---
-def chunk_text(text, chunk_size=500, overlap=50):
-    """Split text into overlapping word chunks."""
-    words = text.split()
-    chunks = []
-    start = 0
-    while start < len(words):
-        end = start + chunk_size
-        chunk = " ".join(words[start:end])
-        chunks.append(chunk)
-        start += chunk_size - overlap
-    return chunks
 
 all_chunks = []
 all_ids = []
